@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: great;
+  src: url(../public/font/WinkyRough-Bold.ttf);
+  font-weight: bold;
+}
+@font-face {
+  font-family: great;
+  src: url(../public/font/WinkyRough-Medium.ttf);
+  font-weight: medium;
+}
+@font-face {
+  font-family: great;
+  src: url(../public/font/WinkyRough-Light.ttf);
+  font-weight: thin;
+}
+@font-face {
+  font-family: great;
+  src: url(../public/font/WinkyRough-Italic.ttf);
+  font-weight: italic;
+}
+
+body {
+  font-family: great;
+}
+.my-heading {
+  font-weight: bold;
+}
