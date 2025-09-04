@@ -1,4 +1,3 @@
-// component/Task.js
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck, faPen, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { TaskContext } from "../contexts/TasksContext";
@@ -6,27 +5,36 @@ import { useContext, useState } from "react";
 import ConfermationMsg from "./ConfermationMsg";
 import EditPopup from "./EditPopup";
 
-export default function Task({ task, className = "", taskId, done }) {
+export default function Task({
+  task,
+  className = "",
+  taskId,
+  done,
+  isDisabled,
+}) {
   let { setTasks, tasks, notification } = useContext(TaskContext);
   let [showConfirm, setShowConfirmPopup] = useState(false);
   let [showEditPopup, setShowEditPopup] = useState(false);
 
   function handelDelete() {
+    if (isDisabled) return;
     let newTask = tasks.filter((t) => t.id !== taskId);
     setTasks(newTask);
     setShowConfirmPopup(false);
-    notification();
+    notification("Task deleted successfully");
   }
 
   function handelCheck() {
+    if (isDisabled) return;
     setTasks(tasks.map((t) => (t.id === taskId ? { ...t, done: !t.done } : t)));
-    notification();
+    notification(done ? "Task marked as incomplete" : "Task completed!");
   }
 
   return (
     <>
       <div
         className={`flex items-center justify-between my-4 text-[#aeb0bb] ${className}`}
+        style={{ opacity: isDisabled ? 0.7 : 1 }}
       >
         <div className="flex items-center flex-1">
           <FontAwesomeIcon
@@ -37,12 +45,14 @@ export default function Task({ task, className = "", taskId, done }) {
                 : `opacity-20 hover:opacity-40`
             }`}
             onClick={handelCheck}
+            style={{ pointerEvents: isDisabled ? "none" : "auto" }}
           />
           <span
             onClick={handelCheck}
             className={`cursor-pointer text-[#333] transition duration-300 flex-1 ${
               done ? `opacity-50 line-through` : `opacity-100`
             }`}
+            style={{ pointerEvents: isDisabled ? "none" : "auto" }}
           >
             {task}
           </span>
@@ -51,25 +61,32 @@ export default function Task({ task, className = "", taskId, done }) {
           <FontAwesomeIcon
             icon={faTrash}
             className="text-red-700 mr-3 cursor-pointer hover:text-red-800"
-            onClick={() => setShowConfirmPopup(true)}
+            onClick={() => !isDisabled && setShowConfirmPopup(true)}
+            style={{ pointerEvents: isDisabled ? "none" : "auto" }}
           />
           <FontAwesomeIcon
             icon={faPen}
             className="text-gray-500 cursor-pointer hover:text-gray-700"
-            onClick={() => setShowEditPopup(true)}
+            onClick={() => !isDisabled && setShowEditPopup(true)}
+            style={{ pointerEvents: isDisabled ? "none" : "auto" }}
           />
         </div>
       </div>
 
       {showConfirm && (
         <ConfermationMsg
-          onCancel={() => setShowConfirmPopup(false)}
+          onCancel={() => !isDisabled && setShowConfirmPopup(false)}
           onConfirm={handelDelete}
+          isDisabled={isDisabled}
         />
       )}
 
       {showEditPopup && (
-        <EditPopup onClose={() => setShowEditPopup(false)} taskId={taskId} />
+        <EditPopup
+          onClose={() => !isDisabled && setShowEditPopup(false)}
+          taskId={taskId}
+          isDisabled={isDisabled}
+        />
       )}
     </>
   );

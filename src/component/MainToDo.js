@@ -1,4 +1,3 @@
-// component/MainToDo.js
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars, faPlus } from "@fortawesome/free-solid-svg-icons";
 import MyButton from "./MyButton";
@@ -6,9 +5,17 @@ import { TaskContext } from "../contexts/TasksContext";
 import { useContext, useState } from "react";
 import Task from "./Task";
 import AddPopup from "./AddPopup";
+import Notification from "./Notification";
 
 export default function MainToDo() {
-  let { tasks, filter, setFilter } = useContext(TaskContext);
+  let {
+    tasks,
+    filter,
+    setFilter,
+    showNotification,
+    notificationMessage,
+    isDisabled,
+  } = useContext(TaskContext);
   let [showAddPopup, setShowAddPopup] = useState(false);
   let [showMenu, setShowMenu] = useState(false);
 
@@ -26,12 +33,18 @@ export default function MainToDo() {
 
   return (
     <>
+      {/* Layer تعطيل النقر أثناء ظهور الإشعار */}
+      {isDisabled && (
+        <div className="fixed inset-0 z-40 pointer-events-none"></div>
+      )}
+
       <div className="w-full max-w-[500px] m-auto min-h-screen flex flex-col justify-center p-4">
         <div className="shadow-lg flex bg-[#ae7dea] text-white p-3 items-center text-[20px] tracking-wider my-8 relative rounded-lg">
           <FontAwesomeIcon
             icon={faBars}
             className="cursor-pointer"
-            onClick={() => setShowMenu(!showMenu)}
+            onClick={() => !isDisabled && setShowMenu(!showMenu)}
+            style={{ pointerEvents: isDisabled ? "none" : "auto" }}
           />
 
           {showMenu && (
@@ -40,8 +53,10 @@ export default function MainToDo() {
                 <li
                   key={e.value}
                   onClick={() => {
-                    setFilter(e.value);
-                    setShowMenu(false);
+                    if (!isDisabled) {
+                      setFilter(e.value);
+                      setShowMenu(false);
+                    }
                   }}
                   className={`p-3 cursor-pointer transition duration-200 ${
                     filter === e.value
@@ -50,6 +65,7 @@ export default function MainToDo() {
                   } ${
                     i === menuList.length - 1 ? "" : "border-b border-white/20"
                   }`}
+                  style={{ pointerEvents: isDisabled ? "none" : "auto" }}
                 >
                   {e.label}
                 </li>
@@ -73,6 +89,7 @@ export default function MainToDo() {
                 className={i === filteredTasks.length - 1 ? "mb-10" : ""}
                 taskId={t.id}
                 done={t.done}
+                isDisabled={isDisabled}
               />
             ))
           )}
@@ -80,7 +97,11 @@ export default function MainToDo() {
           <div className="absolute left-1/2 bottom-0 transform -translate-x-1/2 translate-y-1/2">
             <MyButton
               className="flex items-center gap-2"
-              onClick={() => setShowAddPopup(true)}
+              onClick={() => !isDisabled && setShowAddPopup(true)}
+              style={{
+                pointerEvents: isDisabled ? "none" : "auto",
+                opacity: isDisabled ? 0.7 : 1,
+              }}
             >
               <FontAwesomeIcon icon={faPlus} className="text-[14px]" />
               <span>New Task</span>
@@ -89,7 +110,11 @@ export default function MainToDo() {
         </div>
       </div>
 
-      {showAddPopup && <AddPopup onClose={() => setShowAddPopup(false)} />}
+      {showAddPopup && (
+        <AddPopup onClose={() => !isDisabled && setShowAddPopup(false)} />
+      )}
+
+      {showNotification && <Notification>{notificationMessage}</Notification>}
     </>
   );
 }

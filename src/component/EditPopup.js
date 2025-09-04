@@ -20,7 +20,7 @@ export default function EditPopup({ onClose, taskId }) {
       tasks.map((t) => (t.id === taskId ? { ...t, task: inputEdit } : t))
     );
     onClose();
-    notification();
+    notification("Task updated successfully!");
   }
 
   return (

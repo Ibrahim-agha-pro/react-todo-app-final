@@ -11,9 +11,8 @@ export default function AddPopup({ onClose }) {
     if (inputAdd.trim() === "") return;
     setTasks([...tasks, { task: inputAdd, id: Date.now(), done: false }]);
     onClose();
-    notification();
+    notification("Task added successfully!");
   }
-
   return (
     <div>
       <div

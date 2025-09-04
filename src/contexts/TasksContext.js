@@ -1,8 +1,6 @@
-// contexts/TasksContext.js
 import { createContext, useState, useEffect } from "react";
 export let TaskContext = createContext();
 
-// المهام الافتراضية
 const initialTasks = [
   { id: 1, task: "Take a shower", done: false },
   { id: 2, task: "Meditate for 10 minutes", done: false },
@@ -13,42 +11,30 @@ const initialTasks = [
 ];
 
 export default function TasksProvider({ children }) {
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState(() => {
+    const savedTasks = localStorage.getItem("todoTasks");
+    return savedTasks ? JSON.parse(savedTasks) : initialTasks;
+  });
+
   const [filter, setFilter] = useState("all");
   const [showNotification, setShowNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState("");
+  const [isDisabled, setIsDisabled] = useState(false);
 
-  // تحميل المهام من localStorage عند بدء التطبيق
   useEffect(() => {
-    try {
-      const savedTasks = localStorage.getItem("todoTasks");
-      if (savedTasks) {
-        const parsedTasks = JSON.parse(savedTasks);
-        setTasks(parsedTasks);
-      } else {
-        setTasks(initialTasks);
-      }
-    } catch (error) {
-      console.error("Error loading tasks from localStorage:", error);
-      setTasks(initialTasks);
-    }
-  }, []);
-
-  // حفظ المهام في localStorage عند أي تغيير
-  useEffect(() => {
-    if (tasks.length > 0) {
-      try {
-        localStorage.setItem("todoTasks", JSON.stringify(tasks));
-      } catch (error) {
-        console.error("Error saving tasks to localStorage:", error);
-      }
-    }
+    localStorage.setItem("todoTasks", JSON.stringify(tasks));
   }, [tasks]);
 
-  function notification() {
+  function notification(message = "Operation completed successfully") {
+    setNotificationMessage(message);
     setShowNotification(true);
+    setIsDisabled(true);
+
     setTimeout(() => {
       setShowNotification(false);
-    }, 2000);
+      setNotificationMessage("");
+      setIsDisabled(false);
+    }, 1000);
   }
 
   return (
@@ -60,6 +46,8 @@ export default function TasksProvider({ children }) {
         setFilter,
         notification,
         showNotification,
+        notificationMessage,
+        isDisabled,
       }}
     >
       {children}
